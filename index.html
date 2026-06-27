@@ -126,6 +126,16 @@ select{font-family:"Hanken Grotesk";font-weight:600;font-size:14px;color:var(--i
 
 .banner{display:none;margin:0 16px 8px;padding:11px 13px;border-radius:13px;background:rgba(217,140,124,.12);border:1px solid var(--rose);color:#f2c3ba;font-size:12.5px;line-height:1.4}
 .banner.show{display:block}
+.tab-lane-wrap{width:100vw;margin-left:calc(50% - 50vw);margin-top:12px;background:linear-gradient(180deg,#241a13,#15100b);border-top:1px solid var(--edge);border-bottom:1px solid var(--edge)}
+#tabCanvas{display:block;width:100%;height:300px}
+@media (orientation:landscape){#tabCanvas{height:64vh}}
+.lane-read{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}
+.read-note{font-family:"Fraunces",serif;font-weight:600;font-size:30px;min-width:58px}
+.read-fb{font-family:"Spline Sans Mono",monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;height:16px}
+.read-fb.good{color:var(--sage)}.read-fb.near{color:var(--gold-soft)}.read-fb.miss{color:var(--rose)}
+.legend{display:flex;gap:9px;flex-wrap:wrap;margin-left:auto;font-family:"Spline Sans Mono",monospace;font-size:10px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:11px;height:11px;border-radius:50%;display:inline-block}
 #gate{position:fixed;inset:0;z-index:50;display:grid;place-items:center;text-align:center;padding:32px;background:radial-gradient(120% 80% at 50% 18%,#2A1E16,#130D09)}
 #gate .g-k{font-family:"Spline Sans Mono",monospace;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold-soft)}
 #gate h2{font-family:"Fraunces",serif;font-weight:600;font-size:33px;margin:10px 0 8px}
@@ -195,6 +205,31 @@ select{font-family:"Hanken Grotesk";font-weight:600;font-size:14px;color:var(--i
       </div>
     </section>
 
+    <!-- TABLATURA -->
+    <section class="view" id="v-tab">
+      <div class="eyebrow">Tablatura — estilo Yousician</div>
+      <p class="lead">As notas vêm da direita; toque quando passam pela linha branca. O número é a casa (0 = corda solta) e a cor é o dedo que pisa: <b style="color:#F2C94C">indicador</b>, <b style="color:#9B51E0">médio</b>, <b style="color:#2F80ED">anelar</b>, <b style="color:#EB5757">mindinho</b>. Vire o celular na horizontal.</p>
+      <select id="tabSel" style="width:100%"></select>
+      <div class="tab-lane-wrap"><canvas id="tabCanvas"></canvas></div>
+      <div class="lane-read">
+        <div class="read-note" id="tabRead">—</div>
+        <div class="read-fb" id="tabFb"></div>
+        <div class="legend">
+          <span><i style="background:#B8BCC2"></i>0 solta</span><span><i style="background:#F2C94C"></i>indic.</span><span><i style="background:#9B51E0"></i>médio</span><span><i style="background:#2F80ED"></i>anelar</span><span><i style="background:#EB5757"></i>mind.</span>
+        </div>
+      </div>
+      <div class="controls">
+        <div class="tempo"><label>Tempo</label><div class="bpm" id="tabBpmTxt">55<span> bpm</span></div><input type="range" id="tabBpm" min="40" max="100" value="55"></div>
+        <button class="btn gold" id="tabStart">▶︎ Tocar</button>
+      </div>
+      <div class="toggle-row">
+        <div class="toggle on" id="tabGuide"><span class="bx">✓</span>Violão-guia</div>
+        <div class="toggle on" id="tabMetro"><span class="bx">✓</span>Metrônomo</div>
+        <div class="toggle" id="tabLoop"><span class="bx"></span>Repetir</div>
+      </div>
+      <div class="note-small">Topo = corda fina (mizinha "e"); base = corda grossa (Mi grave). Por compasso: baixo do acorde, depois cordas G, B e e. Comece devagar e suba o tempo aos poucos.</div>
+    </section>
+
     <!-- MÚSICA -->
     <section class="view" id="v-song">
       <div class="eyebrow">Tocar a música</div>
@@ -224,6 +259,7 @@ select{font-family:"Hanken Grotesk";font-weight:600;font-size:14px;color:var(--i
   <nav class="tabbar"><div class="inner">
     <button class="tab active" data-v="v-tune"><svg viewBox="0 0 24 24"><path d="M12 3v18M5 8v8M19 8v8"/></svg>Afinador</button>
     <button class="tab" data-v="v-chords"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 4v16M14 4v16M4 9h16M4 14h16"/></svg>Acordes</button>
+    <button class="tab" data-v="v-tab"><svg viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h18"/><circle cx="8" cy="7" r="1.6" fill="currentColor" stroke="none"/><circle cx="14" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="10" cy="17" r="1.6" fill="currentColor" stroke="none"/></svg>Tablatura</button>
     <button class="tab" data-v="v-song"><svg viewBox="0 0 24 24"><path d="M4 6h11M4 12h16M4 18h9"/><circle cx="18" cy="17" r="2.4"/></svg>Música</button>
   </div></nav>
 </div>
@@ -288,6 +324,7 @@ function resetChordButtons(){document.querySelectorAll("[data-ch]").forEach(b=>{
 function resetTimedUI(){
   trStart.textContent="▶︎ Treinar";trStart.classList.add("gold");
   songStart.textContent="▶︎ Tocar";songStart.classList.add("gold");
+  tabStart.textContent="▶︎ Tocar";tabStart.classList.add("gold");
   songBeatEls.forEach(p=>p.classList.remove("on"));trBeatEls.forEach(p=>p.classList.remove("on"));
   strumEls.forEach(s=>s.classList.remove("on"));
 }
@@ -328,6 +365,7 @@ function yin(buf,sr){
 }
 const NN=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
 function note(f){const m=Math.round(69+12*Math.log2(f/440)),ex=69+12*Math.log2(f/440);return{name:NN[(m%12+12)%12],oct:Math.floor(m/12)-1,cents:Math.round((ex-m)*100)};}
+function matchCents(det,target){let r=det/target;while(r>1.5)r/=2;while(r<0.66)r*=2;return Math.abs(1200*Math.log2(r));}
 function median(a){const b=a.slice().sort((x,y)=>x-y);return b[Math.floor(b.length/2)];}
 function micLoop(){
   if(!micOn)return;
@@ -434,11 +472,81 @@ songGuide.addEventListener("click",()=>songGuide.classList.toggle("on"));
 songLoop.addEventListener("click",()=>songLoop.classList.toggle("on"));
 loadLines();
 
+/* ===== TABLATURA (Yousician) ===== */
+const FCOLOR={0:"#B8BCC2",1:"#F2C94C",2:"#9B51E0",3:"#2F80ED",4:"#EB5757"};
+const FTEXT={0:"#1c1209",1:"#1c1209",2:"#ffffff",3:"#ffffff",4:"#ffffff"};
+let allChords=[];SONG.forEach(s=>s.lines.forEach(l=>allChords.push(l.ch)));
+function bassIdx(ch){const f=CHORDS[ch].frets;for(let i=0;i<6;i++)if(f[i]>=0)return i;return 0;}
+function tabEvFor(ch,pos){const idx=pos===0?bassIdx(ch):[null,3,4,5][pos];const fret=CHORDS[ch].frets[idx],finger=CHORDS[ch].fingers[idx],freq=sfreq(idx,fret);return{stringIdx:idx,fret,finger,freq,letter:note(freq).name};}
+const tabSel=document.getElementById("tabSel"),tabCanvas=document.getElementById("tabCanvas"),tctx=tabCanvas.getContext("2d");
+const tabStart=document.getElementById("tabStart"),tabBpm=document.getElementById("tabBpm"),tabBpmTxt=document.getElementById("tabBpmTxt");
+const tabGuide=document.getElementById("tabGuide"),tabMetro=document.getElementById("tabMetro"),tabLoop=document.getElementById("tabLoop"),tabRead=document.getElementById("tabRead"),tabFb=document.getElementById("tabFb");
+let tabChords=["Am","Fmaj7","G","Am"],tabLoopForced=true,tabEvents={};
+tabSel.innerHTML=`<option value="loop">Dedilhado — treino em loop (Am · F · G · Am)</option><option value="all">Música inteira (dedilhado)</option>`+SONG.map((s,i)=>`<option value="s${i}">${s.name}</option>`).join("");
+function loadTabScope(){const v=tabSel.value;
+  if(v==="loop"){tabChords=["Am","Fmaj7","G","Am"];tabLoopForced=true;tabLoop.classList.add("on");tabLoop.style.opacity=".5";tabLoop.style.pointerEvents="none";}
+  else{tabLoopForced=false;tabLoop.style.opacity="1";tabLoop.style.pointerEvents="auto";
+    if(v==="all")tabChords=allChords.slice();else tabChords=SONG[+v.slice(1)].lines.map(l=>l.ch);}}
+const tabLooping=()=>tabLoopForced||tabLoop.classList.contains("on");
+function tabCur(beat){const bar=Math.floor(beat/4);let bi=tabLooping()?((bar%tabChords.length)+tabChords.length)%tabChords.length:bar;if(bi<0||bi>=tabChords.length)return null;return tabEvFor(tabChords[bi],((beat%4)+4)%4);}
+function sizeTab(){const r=tabCanvas.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1);tabCanvas.width=Math.max(1,r.width*dpr);tabCanvas.height=Math.max(1,r.height*dpr);tctx.setTransform(dpr,0,0,dpr,0,0);}
+function rr(c,x,y,w,h,r){r=Math.min(r,h/2,w/2);c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();}
+function drawTab(){
+  const W=tabCanvas.getBoundingClientRect().width,H=tabCanvas.getBoundingClientRect().height;
+  tctx.clearRect(0,0,W,H);
+  const gutter=32,top=22,bot=H-22,gap=(bot-top)/5,yOf=i=>top+(5-i)*gap;
+  for(let i=0;i<6;i++){const y=yOf(i);tctx.strokeStyle="rgba(205,168,108,"+(0.45+(5-i)*0.05)+")";tctx.lineWidth=1+(5-i)*0.4;tctx.beginPath();tctx.moveTo(gutter,y);tctx.lineTo(W,y);tctx.stroke();
+    tctx.fillStyle="#A89488";tctx.font="600 12px 'Spline Sans Mono',monospace";tctx.textAlign="center";tctx.textBaseline="middle";tctx.fillText(SNAME[i],gutter/2,y);}
+  const hitX=gutter+(W-gutter)*0.16,pxBeat=(W-hitX)/4.2,beatDur=Engine.running?Engine.beatDur:60/(+tabBpm.value);
+  tctx.strokeStyle="rgba(255,255,255,.9)";tctx.lineWidth=3;tctx.beginPath();tctx.moveTo(hitX,top-8);tctx.lineTo(hitX,bot+8);tctx.stroke();
+  if(!Engine.running)return;
+  const now=ac.currentTime,curBeat=Engine.beatNow(),pillH=Math.min(34,gap*0.8);
+  for(let b=Math.floor(curBeat)-1;b<curBeat+5.5;b++){
+    if(b<0)continue;const ev=tabCur(b);if(!ev)continue;
+    const t=Engine.startTime+b*beatDur,x=hitX+(t-now)/beatDur*pxBeat,w=pxBeat*0.86;
+    if(x>W||x+w<gutter)continue;
+    const y=yOf(ev.stringIdx),g=tabEvents[b],res=g&&g.graded?g.res:null,active=Math.abs(x-hitX)<pxBeat*0.5;
+    const col=res==="good"?"#7FC1A0":res==="miss"?"rgba(217,140,124,.6)":FCOLOR[ev.finger];
+    tctx.fillStyle=col;tctx.shadowColor=col;tctx.shadowBlur=active?16:5;rr(tctx,x,y-pillH/2,w,pillH,pillH/2);tctx.fill();tctx.shadowBlur=0;
+    tctx.textBaseline="middle";tctx.textAlign="left";tctx.fillStyle=res?"#0e2a1d":FTEXT[ev.finger];
+    tctx.font="700 16px 'Hanken Grotesk',sans-serif";tctx.fillText(String(ev.fret),x+12,y);
+    tctx.font="600 11px 'Spline Sans Mono',monospace";tctx.fillText(ev.letter,x+12+String(ev.fret).length*10+4,y+1);
+  }
+}
+function gradeTab(){
+  if(timed.kind!=="tab"||!Engine.running)return;
+  const now=ac.currentTime,cb=Engine.beatNow(),b=Math.round(cb),t=Engine.startTime+b*Engine.beatDur;
+  if(b>=0&&Math.abs(now-t)<0.17&&tabEvents[b]&&!tabEvents[b].graded){
+    const ev=tabCur(b);
+    if(!ev){tabEvents[b].graded=true;}
+    else if(micOn&&detFresh()){const cents=matchCents(detected.freq,ev.freq);const res=cents<70?"good":cents<170?"near":"miss";tabEvents[b].graded=true;tabEvents[b].res=res;tabRead.textContent=note(detected.freq).name;tabFb.className="read-fb "+(res==="good"?"good":res==="near"?"near":"miss");tabFb.textContent=res==="good"?"Boa!":res==="near"?"quase":"erro";}
+    else tabEvents[b].graded=true;
+  }
+  for(const k in tabEvents){if(+k<cb-3)delete tabEvents[k];}
+}
+function startTab(){
+  stopAllSound();loadTabScope();Engine.bpm=+tabBpm.value;tabEvents={};tabRead.textContent="—";tabFb.textContent="";
+  tabStart.textContent="■ Parar";tabStart.classList.remove("gold");timed.kind="tab";
+  const guide=tabGuide.classList.contains("on");
+  Engine.start((b,t)=>{if(b<0)return;const ev=tabCur(b);if(!ev){if(!tabLooping())setTimeout(()=>{if(timed.kind==="tab")stopAllSound();},(t-ac.currentTime+Engine.beatDur)*1000);return;}tabEvents[b]={graded:false,res:null};if(guide)pluck(ev.freq,t,0.7);},{silent:!tabMetro.classList.contains("on")});
+  const loop=()=>{if(timed.kind!=="tab")return;drawTab();gradeTab();timed.raf=requestAnimationFrame(loop);};loop();
+}
+tabStart.addEventListener("click",()=>{timed.kind==="tab"?stopAllSound():startTab();});
+tabBpm.addEventListener("input",()=>{tabBpmTxt.firstChild.nodeValue=tabBpm.value;if(timed.kind==="tab")stopAllSound();else drawTab();});
+tabSel.addEventListener("change",()=>{stopAllSound();loadTabScope();drawTab();});
+tabGuide.addEventListener("click",()=>tabGuide.classList.toggle("on"));
+tabMetro.addEventListener("click",()=>tabMetro.classList.toggle("on"));
+tabLoop.addEventListener("click",()=>{if(!tabLoopForced)tabLoop.classList.toggle("on");});
+loadTabScope();
+window.addEventListener("resize",()=>{if(activeView==="v-tab"){sizeTab();drawTab();}});
+window.addEventListener("orientationchange",()=>{setTimeout(()=>{if(activeView==="v-tab"){sizeTab();drawTab();}},260);});
+
 /* ===== TABS / GATE ===== */
 let activeView="v-tune";
 document.querySelectorAll(".tab").forEach(tab=>{tab.addEventListener("click",()=>{ensureAudio();stopAllSound();
   document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
-  tab.classList.add("active");activeView=tab.dataset.v;document.getElementById(activeView).classList.add("active");});});
+  tab.classList.add("active");activeView=tab.dataset.v;document.getElementById(activeView).classList.add("active");
+  if(activeView==="v-tab"){sizeTab();drawTab();}});});
 document.getElementById("gatePlay").addEventListener("click",()=>{ensureAudio();strum("Am");document.getElementById("gate").classList.add("hide");});
 document.body.addEventListener("touchstart",()=>{if(ac&&ac.state==="suspended")ac.resume();},{once:true,passive:true});
 </script>
